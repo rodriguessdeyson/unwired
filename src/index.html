@@ -8,8 +8,60 @@
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#121018" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!--
+      Abertura animada. Começa idêntica à tela do Android (ícone de 240 dp num círculo
+      azul de 160 dp, no centro), para a troca não aparecer. Controlada por src/intro.ts.
+    -->
+    <style>
+      #intro { position: fixed; inset: 0; z-index: 100000; background: #121018; transition: opacity 320ms ease; }
+      #intro.done { opacity: 0; pointer-events: none; }
+      #intro .mark { position: absolute; left: 50%; top: 50%; width: 240px; height: 240px; transform: translate(-50%, -50%); transition: transform 320ms ease; }
+      #intro.done .mark { transform: translate(-50%, -50%) scale(0.92); }
+      #intro .disc, #intro .wave { position: absolute; left: 40px; top: 40px; width: 160px; height: 160px; border-radius: 50%; }
+      #intro .disc { background: #738dca; }
+      #intro .wave { border: 2px solid #9db2ec; opacity: 0; box-sizing: border-box; }
+      #intro svg { position: absolute; inset: 0; width: 240px; height: 240px; overflow: visible; }
+      #intro rect { transform-box: fill-box; transform-origin: 50% 100%; }
+      #intro .text { position: absolute; left: 0; right: 0; top: calc(50% + 136px); text-align: center; }
+      #intro .name { font: 700 34px/1 'Instrument Sans', system-ui, sans-serif; letter-spacing: -0.5px; color: #f3f0f7; opacity: 0; transform: translateY(10px); }
+      #intro .name span { color: #9db2ec; }
+      #intro .tag { margin-top: 10px; font: 500 14px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 1px; color: #a8a2b8; opacity: 0; transform: translateY(10px); }
+
+      #intro.play rect { animation: intro-bar 900ms ease-in-out infinite; }
+      #intro.play .b2 { animation-delay: 150ms; }
+      #intro.play .b3 { animation-delay: 300ms; }
+      #intro.play .wave { animation: intro-wave 1400ms ease-out infinite; }
+      #intro.play .w2 { animation-delay: 700ms; }
+      #intro.play .name { animation: intro-in 420ms 220ms ease-out forwards; }
+      #intro.play .tag { animation: intro-in 420ms 380ms ease-out forwards; }
+
+      @keyframes intro-bar { 0%, 100% { transform: scaleY(1); } 35% { transform: scaleY(0.45); } 70% { transform: scaleY(1.15); } }
+      @keyframes intro-wave { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
+      @keyframes intro-in { to { opacity: 1; transform: none; } }
+
+      @media (prefers-reduced-motion: reduce) {
+        #intro.play rect, #intro.play .wave { animation: none; }
+        #intro.play .name, #intro.play .tag { animation: none; opacity: 1; transform: none; }
+      }
+    </style>
   </head>
   <body>
+    <div id="intro" aria-hidden="true">
+      <div class="mark">
+        <div class="wave"></div>
+        <div class="wave w2"></div>
+        <div class="disc"></div>
+        <svg viewBox="0 0 108 108">
+          <rect class="b1" x="35.5" y="55" width="11" height="20" rx="1.5" fill="#121018" />
+          <rect class="b2" x="48.5" y="33" width="11" height="42" rx="1.5" fill="#121018" />
+          <rect class="b3" x="61.5" y="61" width="11" height="14" rx="1.5" fill="#ffc90e" />
+        </svg>
+      </div>
+      <div class="text">
+        <div class="name">un<span>Wired</span></div>
+        <div class="tag">Bluetooth · BLE · Wi-Fi</div>
+      </div>
+    </div>
     <app-root></app-root>
   </body>
 </html>

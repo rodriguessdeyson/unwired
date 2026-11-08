@@ -16,4 +16,4 @@ npm test -- --watch=false
 npx ng build
 ```
 
-For native changes, also run `npx cap sync android` and `android\gradlew.bat assembleDebug` with `JAVA_HOME` set to Android Studio's `jbr`. The browser build uses simulated devices from `src/app/core/connection/mock.ts`, so it proves nothing about Bluetooth: say so when hardware testing is still pending.
+For native changes, also run `npx cap sync android` and `android\gradlew.bat assembleDebug` with `JAVA_HOME` set to Android Studio's `jbr`. Read the full `cap sync` output and confirm `android/app/src/main/assets/public/index.html` exists: a partial copy still prints "Sync finished" and the app opens on a localhost error. The browser build uses simulated devices from `src/app/core/connection/mock.ts`, so it proves nothing about Bluetooth: say so when hardware testing is still pending.
