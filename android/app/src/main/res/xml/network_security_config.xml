@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Módulos na rede local, como o Iluminus, só falam HTTP sem criptografia. O Android não permite limitar isso a uma faixa de IPs. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

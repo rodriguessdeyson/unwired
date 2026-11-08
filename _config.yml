@@ -1,0 +1,19 @@
+# Keep GitHub Pages serving the existing privacy site, independently of the app.
+exclude:
+  - android
+  - src
+  - public
+  - tools
+  - docs
+  - store
+  - node_modules
+  - dist
+  - tmp
+  - AGENTS.md
+  - angular.json
+  - capacitor.config.ts
+  - package.json
+  - package-lock.json
+  - tsconfig.json
+  - tsconfig.app.json
+  - tsconfig.spec.json
