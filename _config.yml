@@ -6,7 +6,6 @@ exclude:
   - tools
   - docs
   - examples
-  - fastlane
   - node_modules
   - dist
   - AGENTS.md

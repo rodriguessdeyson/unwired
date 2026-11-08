@@ -15,9 +15,8 @@ Feito com Angular, Ionic, Capacitor e Tailwind. Substitui o app Android antigo, 
 | `src/app/i18n/` | Textos em pt, en e es |
 | `android/` | Projeto nativo do Capacitor, com o plugin serial em `com.rad.unwired` |
 | `examples/` | Sketches de Arduino e ESP e exemplos do protocolo, mostrados no guia do app |
-| `tools/` | Simulador de placas, scripts do CI e gerador das artes da loja |
-| `fastlane/metadata/android/` | Ícone, banner e capturas da Play Store por idioma, no formato do fastlane |
-| `docs/` | CI/CD e artes da loja |
+| `tools/` | Simulador de placas, scripts do CI e gerador dos ícones do launcher |
+| `docs/` | CI/CD |
 | `index.html`, `_config.yml` | Site de privacidade no GitHub Pages |
 
 ## Rodar
@@ -87,7 +86,7 @@ npm test -- --watch=false
 
 O fluxo do GitHub Actions valida pull requests e `main`. Tags `vX.Y.Z` geram um
 AAB assinado e enviam para o teste interno do Google Play. A configuração de
-credenciais, versionamento e publicação está em [docs/ci-cd.md](docs/ci-cd.md). As artes da loja estão descritas em [docs/play-store.md](docs/play-store.md).
+credenciais, versionamento e publicação está em [docs/ci-cd.md](docs/ci-cd.md).
 
 ## Site
 
