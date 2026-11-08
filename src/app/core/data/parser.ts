@@ -13,14 +13,35 @@ export interface ParseResult {
 
 const isNumeric = (text: string): boolean => text.trim() !== '' && Number.isFinite(Number(text));
 
+/** Limites para uma linha enorme não travar a leitura; o rastreador só usa 8 canais. */
+const JSON_MAX_VALUES = 32;
+const JSON_MAX_DEPTH = 4;
+
+/** Números de vetores e objetos aninhados também viram canais: `ondas[0]`, `sensor.temp`. */
+function collectJson(node: unknown, key: string, depth: number, values: ParsedValue[]): void {
+  if (values.length >= JSON_MAX_VALUES) return;
+  if (typeof node === 'number') {
+    if (Number.isFinite(node) && key) values.push({ key, value: node });
+    return;
+  }
+  if (!node || typeof node !== 'object' || depth > JSON_MAX_DEPTH) return;
+  if (Array.isArray(node)) {
+    node.forEach((item, index) => collectJson(item, `${key}[${index}]`, depth + 1, values));
+    return;
+  }
+  for (const [child, item] of Object.entries(node as Record<string, unknown>)) {
+    collectJson(item, key ? `${key}.${child}` : child, depth + 1, values);
+  }
+}
+
 function parseJson(line: string): ParsedValue[] {
   if (!line.trimStart().startsWith('{')) return [];
   try {
     const parsed: unknown = JSON.parse(line);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return [];
-    return Object.entries(parsed as Record<string, unknown>)
-      .filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1]))
-      .map(([key, value]) => ({ key, value }));
+    const values: ParsedValue[] = [];
+    collectJson(parsed, '', 0, values);
+    return values;
   } catch {
     return [];
   }

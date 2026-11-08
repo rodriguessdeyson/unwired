@@ -23,6 +23,17 @@ describe('parseLine', () => {
     expect(result.values).toEqual([{ key: 'temp', value: 23.4 }]);
   });
 
+  it('lê números de vetores e objetos aninhados no JSON', () => {
+    const result = parseLine('auto', '{"seq":172347,"ondas":[0.12759,-0.99182],"sensor":{"temp":21.5,"nome":"a"}}');
+    expect(result.format).toBe('json');
+    expect(result.values).toEqual([
+      { key: 'seq', value: 172347 },
+      { key: 'ondas[0]', value: 0.12759 },
+      { key: 'ondas[1]', value: -0.99182 },
+      { key: 'sensor.temp', value: 21.5 },
+    ]);
+  });
+
   it('detecta XML com números dentro das tags', () => {
     const result = parseLine('auto', '<dados><temp>23.4</temp><umidade>60</umidade><estado>ok</estado></dados>');
     expect(result.format).toBe('xml');
