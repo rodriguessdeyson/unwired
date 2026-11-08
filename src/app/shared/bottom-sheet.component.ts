@@ -1,7 +1,7 @@
 import { afterNextRender, Component, DestroyRef, effect, ElementRef, HostListener, inject, input, output, signal, viewChild } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
-import { AdsService } from '../core/ads.service';
-import { UnwiredSerial } from '../core/native-serial';
+import { AdsService } from '../core/monetization/ads.service';
+import { UnwiredSerial } from '../core/connection/native-serial';
 
 const CLOSE_DISTANCE = 80;
 /** Duração da subida. O foco só vem depois, para o teclado não abrir no meio da animação. */

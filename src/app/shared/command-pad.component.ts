@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SavedCommand } from '../core/models';
-import { SessionStore } from '../core/session.store';
+import { SessionStore } from '../core/session/session.store';
 import { BottomSheetComponent } from './bottom-sheet.component';
 
 /**

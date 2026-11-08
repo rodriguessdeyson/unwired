@@ -4,6 +4,22 @@ Monitor serial e gráfico ao vivo para microcontroladores, por Bluetooth clássi
 
 Feito com Angular, Ionic, Capacitor e Tailwind. Substitui o app Android antigo, mantendo o pacote `com.rad.unwired`.
 
+## Estrutura
+
+| Pasta | Conteúdo |
+|---|---|
+| `src/app/core/` | Serviços sem tela, um assunto por pasta: `connection/` (transportes, busca, Wi-Fi, simulados), `data/` (leitura das linhas, canais, gráfico, exportação), `session/`, `settings/`, `monetization/` (anúncios e Premium), `platform/` (tela ligada, viewport). Os tipos comuns ficam em `models.ts` |
+| `src/app/features/` | Uma pasta por área do app: `devices/`, `session/`, `settings/`, `guide/`, `onboarding/`, `premium/` |
+| `src/app/layout/` | Abas e estrutura que envolve as telas |
+| `src/app/shared/` | Componentes de interface usados por mais de uma área |
+| `src/app/i18n/` | Textos em pt, en e es |
+| `android/` | Projeto nativo do Capacitor, com o plugin serial em `com.rad.unwired` |
+| `examples/` | Sketches de Arduino e ESP e exemplos do protocolo, mostrados no guia do app |
+| `tools/` | Simulador de placas, scripts do CI e gerador das artes da loja |
+| `fastlane/metadata/android/` | Ícone, banner e capturas da Play Store por idioma, no formato do fastlane |
+| `docs/` | CI/CD e artes da loja |
+| `index.html`, `_config.yml` | Site de privacidade no GitHub Pages |
+
 ## Rodar
 
 ```bash
@@ -39,7 +55,7 @@ O formato pode ser fixado por dispositivo, inclusive o legado de 5 bytes do unWi
 
 ## Protocolo Wi-Fi (v1)
 
-Protocolo aberto: qualquer firmware que o siga é encontrado na busca, e o app escolhe sozinho entre gráfico e só comandos. A implementação fica em `src/app/core/wifi-protocol.ts`.
+Protocolo aberto: qualquer firmware que o siga é encontrado na busca, e o app escolhe sozinho entre gráfico e só comandos. A implementação fica em `src/app/core/connection/wifi-protocol.ts`.
 
 1. **Descoberta.** O app envia `DISCOVER_UNWIRED` por broadcast UDP na porta 4210 (configurável em Ajustes). O dispositivo responde para o endereço e a porta de origem:
 
@@ -71,7 +87,7 @@ npm test -- --watch=false
 
 O fluxo do GitHub Actions valida pull requests e `main`. Tags `vX.Y.Z` geram um
 AAB assinado e enviam para o teste interno do Google Play. A configuração de
-credenciais, versionamento e publicação está em [docs/ci-cd.md](docs/ci-cd.md).
+credenciais, versionamento e publicação está em [docs/ci-cd.md](docs/ci-cd.md). As artes da loja estão descritas em [docs/play-store.md](docs/play-store.md).
 
 ## Site
 

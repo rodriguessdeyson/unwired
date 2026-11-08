@@ -20,7 +20,7 @@ import {
   wifi,
 } from 'ionicons/icons';
 
-import { ViewportService } from './core/viewport.service';
+import { ViewportService } from './core/platform/viewport.service';
 
 @Component({
   selector: 'app-root',

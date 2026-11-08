@@ -5,10 +5,10 @@ exclude:
   - public
   - tools
   - docs
-  - store
+  - examples
+  - fastlane
   - node_modules
   - dist
-  - tmp
   - AGENTS.md
   - angular.json
   - capacitor.config.ts

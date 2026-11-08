@@ -1,0 +1,47 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:IS;src:url(../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:IS;src:url(../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:IS;src:url(../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-700-normal.woff2);font-weight:700}
+@font-face{font-family:PM;src:url(../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:PM;src:url(../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2);font-weight:500}
+html,body{margin:0;width:1024px;height:500px;overflow:hidden;background:#121018;color:#f3f0f7;font-family:IS}
+.wrap{position:relative;width:1024px;height:500px;background:radial-gradient(ellipse 70% 90% at 85% 50%,#1f2340 0%,#121018 70%)}
+.left{position:absolute;left:72px;top:0;bottom:0;width:470px;display:flex;flex-direction:column;justify-content:center;gap:22px}
+.brand{display:flex;align-items:center;gap:20px}
+.logo{width:84px;height:84px;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px #0008}
+h1{margin:0;font-size:68px;font-weight:700;letter-spacing:-1.5px;line-height:1}
+h1 span{color:#9db2ec}
+p{margin:0;font-size:31px;line-height:1.2;font-weight:600;color:#f3f0f7}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{font-family:PM;font-weight:500;font-size:19px;padding:7px 14px;border-radius:999px;border:1.5px solid #38324a;color:#c3d0f4;background:#171420}
+.chip.y{color:#ffc90e;border-color:#5b4a14}
+.panel{position:absolute;right:56px;top:58px;width:400px;height:384px;border-radius:24px;background:#171420;border:1.5px solid #262230;box-shadow:0 20px 50px #0009;overflow:hidden}
+.bar{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1.5px solid #262230;font-size:18px;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;background:#6fd3b0;box-shadow:0 0 10px #6fd3b0}
+.bar small{margin-left:auto;font-family:PM;font-size:14px;color:#a8a2b8;font-weight:400}
+.term{font-family:PM;font-size:14px;line-height:1.55;color:#a8a2b8;padding:10px 20px;border-top:1.5px solid #262230}
+.term b{color:#f3f0f7;font-weight:500}
+</style></head><body><div class="wrap">
+<div class="left">
+ <div class="brand"><div class="logo"><svg width="84" height="84" viewBox="16 16 76 76"><rect width="108" height="108" fill="#738DCA"/><rect x="35.5" y="55" width="11" height="20" rx="1.5" fill="#121018"/><rect x="48.5" y="33" width="11" height="42" rx="1.5" fill="#121018"/><rect x="61.5" y="61" width="11" height="14" rx="1.5" fill="#FFC90E"/></svg></div>
+ <h1>un<span>Wired</span></h1></div>
+ <p id="t"></p>
+ <div class="chips"><span class="chip">Bluetooth</span><span class="chip">BLE</span><span class="chip">Wi-Fi</span><span class="chip y">Arduino · ESP32</span></div>
+</div>
+<div class="panel">
+ <div class="bar"><span class="dot"></span>ESP32 Sensor<small>BLE · -62 dBm</small></div>
+ <svg width="400" height="232" viewBox="0 0 400 232" id="chart"></svg>
+ <div class="term" id="term"></div>
+</div>
+</div>
+<script>
+const L={pt:'Terminal e gráfico em tempo real para seus projetos',en:'Real-time serial terminal and live chart for your projects',es:'Terminal y gráfico en tiempo real para tus proyectos'};
+const lang=new URLSearchParams(location.search).get('lang')||'pt';
+document.getElementById('t').textContent=L[lang];
+const svg=document.getElementById('chart');let g='';
+for(let i=1;i<6;i++)g+=`<line x1="0" x2="400" y1="${i*38}" y2="${i*38}" stroke="#262230" stroke-width="1"/>`;
+const series=[['#ffc90e',x=>116+52*Math.sin(x/34)+14*Math.sin(x/9)],['#9db2ec',x=>150+30*Math.cos(x/47+1)+8*Math.sin(x/6)],['#6fd3b0',x=>70+18*Math.sin(x/21+2)]];
+for(const [c,f] of series){let d='';for(let x=0;x<=400;x+=4)d+=(x?'L':'M')+x+','+f(x).toFixed(1);g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round"/>`;}
+svg.innerHTML=g;
+const K={pt:['temp','umid','luz'],en:['temp','hum','light'],es:['temp','hum','luz']}[lang];document.getElementById('term').innerHTML=[[24.6,58,712],[24.7,58,705]].map(v=>v.map((x,i)=>'<b>'+K[i]+'</b>='+x).join(' ')).join('<br>');
+</script></body></html>

@@ -4,8 +4,8 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
 import { provideTransloco, Translation, TranslocoLoader, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom, from, Observable } from 'rxjs';
 import { routes } from './app.routes';
-import { PremiumStore } from './core/premium.store';
-import { SettingsStore } from './core/settings.store';
+import { PremiumStore } from './core/monetization/premium.store';
+import { SettingsStore } from './core/settings/settings.store';
 
 const LANGUAGES = ['pt', 'en', 'es'];
 
