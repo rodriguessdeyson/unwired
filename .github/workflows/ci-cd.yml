@@ -1,0 +1,134 @@
+name: App CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.15.0'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Test release version rules
+        run: node --test tools/ci/android-version.test.mjs
+      - name: Test app
+        run: npm test -- --watch=false
+      - name: Build web app
+        run: npx ng build
+      - name: Setup Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+      - name: Build debug Android app
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug --stacktrace
+
+  publish-internal:
+    needs: validate
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: google-play-internal
+    concurrency:
+      group: google-play-internal-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.15.0'
+          cache: npm
+      - name: Derive Android version from release tag
+        env:
+          ANDROID_LAST_PUBLISHED_VERSION_CODE: ${{ vars.ANDROID_LAST_PUBLISHED_VERSION_CODE }}
+        run: node tools/ci/android-version.mjs
+      - name: Validate release credentials
+        shell: bash
+        env:
+          UNWIRED_ANDROID_SIGNING_KEY: ${{ secrets.UNWIRED_ANDROID_SIGNING_KEY }}
+          UNWIRED_ANDROID_KEY_ALIAS: ${{ secrets.UNWIRED_ANDROID_KEY_ALIAS }}
+          UNWIRED_ANDROID_STORE_PASSWORD: ${{ secrets.UNWIRED_ANDROID_STORE_PASSWORD }}
+          UNWIRED_ANDROID_KEY_PASSWORD: ${{ secrets.UNWIRED_ANDROID_KEY_PASSWORD }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          for name in UNWIRED_ANDROID_SIGNING_KEY UNWIRED_ANDROID_KEY_ALIAS UNWIRED_ANDROID_STORE_PASSWORD UNWIRED_ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing $name in google-play-internal"
+              exit 1
+            fi
+          done
+          node -e 'try { const c=JSON.parse(process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON); if(c.type!=="service_account" || !c.client_email || !c.private_key) throw Error(); } catch { console.error("Invalid Google Play service account JSON"); process.exit(1); }'
+      - name: Setup Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build web app
+        run: npx ng build
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+      - name: Build Android release bundle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease --stacktrace \
+            -PversionName="$ANDROID_VERSION_NAME" \
+            -PversionCode="$ANDROID_VERSION_CODE"
+      - name: Sign and verify Android bundle
+        shell: bash
+        env:
+          UNWIRED_ANDROID_SIGNING_KEY: ${{ secrets.UNWIRED_ANDROID_SIGNING_KEY }}
+          UNWIRED_ANDROID_KEY_ALIAS: ${{ secrets.UNWIRED_ANDROID_KEY_ALIAS }}
+          UNWIRED_ANDROID_STORE_PASSWORD: ${{ secrets.UNWIRED_ANDROID_STORE_PASSWORD }}
+          UNWIRED_ANDROID_KEY_PASSWORD: ${{ secrets.UNWIRED_ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          KEYSTORE="$RUNNER_TEMP/unwired-upload.keystore"
+          trap 'rm -f "$KEYSTORE"' EXIT
+          printf '%s' "$UNWIRED_ANDROID_SIGNING_KEY" | base64 --decode > "$KEYSTORE"
+          mkdir -p release
+          AAB="release/unwired-${GITHUB_REF_NAME}.aab"
+          jarsigner -keystore "$KEYSTORE" \
+            -storepass:env UNWIRED_ANDROID_STORE_PASSWORD \
+            -keypass:env UNWIRED_ANDROID_KEY_PASSWORD \
+            -signedjar "$AAB" android/app/build/outputs/bundle/release/app-release.aab \
+            "$UNWIRED_ANDROID_KEY_ALIAS"
+          LC_ALL=C jarsigner -verify "$AAB" | tee "$RUNNER_TEMP/unwired-aab-signature.txt"
+          grep -q 'jar verified' "$RUNNER_TEMP/unwired-aab-signature.txt"
+      - name: Publish signed AAB to Google Play Internal
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.rad.unwired
+          releaseFiles: release/unwired-${{ github.ref_name }}.aab
+          tracks: internal
+          status: completed
+          releaseName: ${{ github.ref_name }}
+          changesNotSentForReview: true

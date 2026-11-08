@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash usado pelo SplashScreen.show() do Capacitor: fundo do app e o ícone no centro.
+     A abertura do app usa o tema AppTheme.NoActionBarLaunch (styles.xml). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item
+        android:width="120dp"
+        android:height="120dp"
+        android:gravity="center">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/ic_launcher_background" />
+                    <corners android:radius="28dp" />
+                </shape>
+            </item>
+            <item android:drawable="@drawable/ic_launcher_mark" />
+        </layer-list>
+    </item>
+</layer-list>

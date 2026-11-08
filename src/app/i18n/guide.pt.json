@@ -1,0 +1,185 @@
+{
+  "title": "Guia e exemplos",
+  "tabGuide": "Guia",
+  "tabCode": "Código",
+  "copy": "Copiar",
+  "copied": "Copiado",
+  "copyFailed": "Não foi possível copiar",
+  "allLanguages": "Todas",
+  "sections": [
+    {
+      "id": "start",
+      "title": "Comece aqui",
+      "blocks": [
+        { "steps": [
+          "Ligue seu módulo ou grave um dos exemplos da aba Código.",
+          "Se for Bluetooth clássico, pareie antes nos ajustes de Bluetooth do Android.",
+          "Toque em Buscar dispositivos e escolha o seu na lista ou no radar.",
+          "Os blocos aparecem sozinhos conforme os dados chegam.",
+          "Abra a sessão para ver o gráfico e o terminal."
+        ] }
+      ]
+    },
+    {
+      "id": "connections",
+      "title": "Tipos de conexão",
+      "blocks": [
+        { "h": "Bluetooth clássico (SPP)" },
+        { "p": "Para HC-05, HC-06 e ESP32 original. Usa o canal RFCOMM, que funciona como um cabo serial sem fio. Pareie antes; o PIN costuma ser 1234 ou 0000." },
+        { "h": "BLE" },
+        { "p": "Para HM-10, ESP32 e placas nRF. O app procura o serviço Nordic UART ou o FFE0 ao conectar. Normalmente não precisa parear." },
+        { "h": "Wi-Fi com fluxo TCP" },
+        { "p": "Dados nos dois sentidos, com gráfico e terminal. Celular e dispositivo precisam estar na mesma rede. Se a busca não encontrar, use Adicionar Wi-Fi por IP." },
+        { "h": "Wi-Fi com comandos HTTP" },
+        { "p": "Só envia comandos, por HTTP. Sem dados de volta, não há gráfico nem texto recebido. O app escolhe entre os dois modos sozinho; veja Protocolo Wi-Fi." }
+      ]
+    },
+    {
+      "id": "discovery",
+      "title": "Protocolo Wi-Fi",
+      "blocks": [
+        { "p": "O unWired tem um protocolo Wi-Fi aberto. Qualquer firmware que o siga aparece na busca, e o app escolhe sozinho entre gráfico e só comandos pela resposta do dispositivo." },
+        { "h": "1. Descoberta" },
+        { "p": "Ao tocar em Buscar dispositivos, o app envia DISCOVER_UNWIRED por broadcast UDP na porta 4210, que pode ser trocada em Ajustes. Responda para o endereço e a porta de onde a mensagem veio:" },
+        { "code": "UNWIRED_ACK;id=estufa1;name=Estufa;tcp=8080" },
+        { "rows": [
+          ["id", "Único e fixo, como o MAC sem os dois-pontos. Nomes e cores dos canais ficam salvos por ele"],
+          ["name", "Nome mostrado na lista"],
+          ["tcp", "Porta do fluxo de dados. Sem ela, o dispositivo é só de comandos"],
+          ["http", "Opcional. Porta dos comandos HTTP, quando não for a 80"]
+        ] },
+        { "h": "2. Com tcp: fluxo de dados" },
+        { "p": "O app abre uma conexão TCP nessa porta, nos dois sentidos, com gráfico e terminal. Envie uma leitura por linha, como em Formato dos dados. Os comandos chegam pela mesma conexão, com o fim de linha escolhido em Ajustes." },
+        { "h": "3. Sem tcp: só comandos" },
+        { "code": "GET /set?c=L&r=255&g=0&b=0" },
+        { "p": "Cada comando vira uma requisição HTTP. O texto vai como está, então L&r=255&g=0&b=0 chega como c=L, r=255, g=0 e b=0. Responda com status 200. Ao conectar, o app envia CHECK para testar." },
+        { "h": "Cadastro por IP" },
+        { "p": "Em Adicionar Wi-Fi por IP, o modo Automático faz a mesma pergunta direto ao IP. Se o dispositivo não responder à descoberta, o app tenta o fluxo TCP e depois os comandos HTTP." },
+        { "p": "Dispositivos que respondem ILUMINUS_ACK a DISCOVER_ILUMINUS continuam aceitos, como só comandos na porta 80. Os exemplos ESP32 ou ESP8266 por Wi-Fi e ESP8266 só com comandos, na aba Código, seguem este protocolo." }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Formato dos dados",
+      "blocks": [
+        { "p": "Envie uma leitura por linha, terminada em quebra de linha. O app reconhece o formato sozinho:" },
+        { "rows": [
+          ["T=23.4 H=60.1", "Blocos T e H"],
+          ["23.4,60.1", "Canal 1 e Canal 2"],
+          ["{\"temp\":23.4}", "Bloco temp"],
+          ["<temp>23.4</temp>", "Bloco temp"],
+          ["23.45", "Bloco Valor"],
+          ["Sistema pronto", "Só no terminal"]
+        ] },
+        { "p": "Um nome vira bloco depois de aparecer em 3 linhas, para uma mensagem solta não criar um bloco. Use até 8 canais." },
+        { "p": "Toque em um bloco para mudar nome, unidade e cor, ou para ocultá-lo. Isso fica salvo por dispositivo." },
+        { "p": "Firmware feito para o unWired antigo envia valores de 5 bytes sem quebra de linha. Nesse caso, escolha Legado de 5 bytes em Formato dos dados." }
+      ]
+    },
+    {
+      "id": "commands",
+      "title": "Comandos",
+      "blocks": [
+        { "p": "O que você digita no terminal vai para o dispositivo com o fim de linha escolhido em Ajustes. O padrão é CRLF." },
+        { "p": "O botão de iniciar e parar envia LS e DS. Você pode trocá-los em Ajustes, para combinar com o seu firmware." },
+        { "h": "Iluminus por Wi-Fi" },
+        { "rows": [
+          ["L", "Ligar"],
+          ["D", "Desligar"],
+          ["L&r=255&g=0&b=0", "Cor, de 0 a 255"]
+        ] },
+        { "h": "Iluminus pela serial" },
+        { "rows": [
+          ["L,255,0,0", "Ligar com cor"],
+          ["D", "Desligar"],
+          ["F,0,210,200", "Transição de cor"],
+          ["R,0,0,0", "Arco-íris"],
+          ["T,0,0,0", "Theater chase"]
+        ] },
+        { "p": "No modo só de comandos, adicione botões em Novo comando. Para remover um, mantenha pressionado." }
+      ]
+    },
+    {
+      "id": "baud",
+      "title": "Baudrate e RFCOMM",
+      "blocks": [
+        { "p": "O app não configura baudrate. O Bluetooth e o RFCOMM cuidam do trecho sem fio; o baudrate vale só no fio entre o módulo e a placa." },
+        { "code": "Celular -> Bluetooth -> Módulo -> fio serial -> Placa" },
+        { "p": "Os dois lados desse fio precisam usar a mesma velocidade. Se não usarem, o app conecta, mas nada funciona ou aparecem caracteres estranhos." },
+        { "steps": [
+          "Veja a velocidade do módulo. O HC-05 costuma vir em 9600.",
+          "Use o mesmo valor no firmware, como em Serial.begin(9600).",
+          "Se preferir, mude o módulo. No HC-05, em modo AT: AT+UART=115200,0,0"
+        ] },
+        { "p": "Com SoftwareSerial, prefira 9600: em 115200 ela costuma falhar." }
+      ]
+    },
+    {
+      "id": "session",
+      "title": "Gráfico e terminal",
+      "blocks": [
+        { "p": "Arraste a alça do terminal ou toque em Gráfico, Dividido e Terminal. O sinal continua correndo durante a troca." },
+        { "rows": [
+          ["Travar X", "Mantém o eixo e recomeça ao encher a janela"],
+          ["Rolagem", "Desligada, congela a tela e os dados seguem chegando"],
+          ["Botão de ajustes", "Muda a janela X e a faixa Y, geral ou de cada canal"],
+          ["Toque no valor", "Esconde ou mostra o canal no gráfico"],
+          ["Receber", "Desligado, para de registrar no terminal"],
+          ["Botão de duas barras", "Separa um gráfico por canal, cada um com sua escala Y"],
+          ["HEX", "Mostra os bytes em hexadecimal"]
+        ] },
+        { "p": "Em Mais ações você salva a imagem do gráfico, exporta os dados em CSV e o registro em TXT. Gire o celular para ter o gráfico em tela cheia." }
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testar sem hardware",
+      "blocks": [
+        { "p": "Dá para testar com o próprio computador, se ele estiver na mesma rede que o celular." },
+        { "steps": [
+          "Copie o exemplo Python ou Node.js da aba Código.",
+          "Rode o arquivo no computador.",
+          "No app, vá em Buscar dispositivos e Adicionar Wi-Fi por IP.",
+          "Informe o IP do computador, Fluxo TCP e a porta 8080."
+        ] },
+        { "p": "Se não conectar, verifique se o firewall do computador permite a porta." }
+      ]
+    },
+    {
+      "id": "problems",
+      "title": "Problemas comuns",
+      "blocks": [
+        { "rows": [
+          ["O módulo não aparece", "Confira se está ligado e livre. Pareie os clássicos antes, e veja a permissão de Dispositivos por perto."],
+          ["Não conecta", "Outro aparelho pode estar conectado ao módulo. Desligue e ligue o módulo."],
+          ["Conecta, mas não chega nada", "Confira o baudrate e os fios: TX do módulo vai no RX da placa, e vice-versa."],
+          ["Aparecem caracteres estranhos", "Quase sempre é baudrate diferente entre o módulo e a placa."],
+          ["Comandos são ignorados", "Teste outro fim de linha em Ajustes e confira se o firmware espera esse comando."],
+          ["Não aparecem blocos", "O texto precisa ter números em um dos formatos, em pelo menos 3 linhas. Veja Formato dos dados."],
+          ["BLE sem serviço UART", "O dispositivo não usa Nordic UART nem FFE0, então o app não sabe como falar com ele."],
+          ["A busca não acha o Wi-Fi", "Algumas redes bloqueiam a descoberta. Use Adicionar Wi-Fi por IP."]
+        ] }
+      ]
+    }
+  ],
+  "groups": {
+    "project": "Projetos prontos para copiar",
+    "board": "Conectar sua placa"
+  },
+  "examples": {
+    "arduinoLed": { "title": "Ligar e desligar um LED", "desc": "Arduino com HC-05. Envie LED1=ON ou LED1=OFF no terminal." },
+    "arduinoDht11": { "title": "Temperatura e umidade com DHT11", "desc": "Arduino com HC-05. Mostra os blocos T e H. Precisa da biblioteca DHT da Adafruit." },
+    "arduinoLm35": { "title": "Temperatura com LM35", "desc": "Arduino com HC-05. Mostra o bloco T. Só mede temperatura e não precisa de biblioteca." },
+    "arduinoHcsr04": { "title": "Distância com ultrassônico HC-SR04", "desc": "Arduino com HC-05. Mostra a distância em centímetros no bloco Dist." },
+    "arduinoHc05": { "title": "Arduino com HC-05", "desc": "Uno ou Nano com módulo Bluetooth clássico. Inclui a ligação dos fios." },
+    "esp32Spp": { "title": "ESP32 por Bluetooth clássico", "desc": "ESP32 original, sem módulo externo. Não serve para S3 e C3." },
+    "esp32Ble": { "title": "ESP32 por BLE", "desc": "Serviço Nordic UART. Funciona na família ESP32, inclusive S3 e C3." },
+    "esp32Wifi": { "title": "ESP32 ou ESP8266 por Wi-Fi", "desc": "Fluxo TCP, e o app encontra a placa sozinho." },
+    "esp8266Http": { "title": "ESP8266 só com comandos", "desc": "Protocolo Wi-Fi do unWired, no modo só de comandos." },
+    "micropythonWifi": { "title": "MicroPython por Wi-Fi", "desc": "ESP32 ou Raspberry Pi Pico W, com fluxo TCP." },
+    "micropythonUart": { "title": "MicroPython com HC-05", "desc": "Placa com módulo Bluetooth clássico em uma UART." },
+    "pythonTcp": { "title": "Python no computador", "desc": "Sensor falso para testar sem placa. Roda em PC ou Raspberry Pi." },
+    "nodeTcp": { "title": "Node.js no computador", "desc": "Sensor falso para testar sem placa, sem instalar nada." },
+    "cGeneric": { "title": "C para qualquer microcontrolador", "desc": "PIC, STM32 ou AVR com módulo em UART. Você completa as funções do seu chip." }
+  }
+}

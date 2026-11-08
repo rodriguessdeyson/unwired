@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fundo do app (ink-900 em src/styles.css), usado na abertura e no splash. -->
+    <color name="splash_background">#121018</color>
+</resources>
