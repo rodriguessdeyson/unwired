@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent;overflow:hidden}svg{display:block;width:100vw;height:100vh}</style></head><body>
+<!-- Ícone de launcher para Android 7.0 e 7.1 (sem ícone adaptativo). ?shape=square ou ?shape=round -->
+<svg id="s" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const round = new URLSearchParams(location.search).get('shape') === 'round';
+// Fundo: quadrado arredondado ou círculo, com 4% de margem como os ícones do sistema.
+const bg = round ? '<circle cx="54" cy="54" r="50" fill="#738DCA"/>' : '<rect x="6" y="6" width="96" height="96" rx="18" fill="#738DCA"/>';
+// Barras do ic_launcher_mark.xml, ampliadas em torno do centro para ocupar o ícone.
+const k = round ? 1.25 : 1.35, t = 54 - 54 * k;
+s.innerHTML = bg + `<g transform="translate(${t} ${t}) scale(${k})">` +
+  '<rect x="35.5" y="55" width="11" height="20" rx="1.5" fill="#121018"/>' +
+  '<rect x="48.5" y="33" width="11" height="42" rx="1.5" fill="#121018"/>' +
+  '<rect x="61.5" y="61" width="11" height="14" rx="1.5" fill="#FFC90E"/></g>';
+</script></body></html>
