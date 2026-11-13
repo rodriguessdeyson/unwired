@@ -7,7 +7,10 @@ Segue o modelo do Ohm Finder: GitHub Actions, tags `vX.Y.Z`, ambiente
 ## Validação
 
 Pull requests e pushes em `main` executam instalação pelo lockfile, testes do app,
-testes do versionamento, build web, `cap sync android` e `assembleDebug`.
+testes do versionamento, build web, `cap sync android`, `assembleDebug` e
+`bundleRelease` sem assinatura. O `cap sync` falha se o `index.html` não chegar ao
+projeto Android. O `bundleRelease` roda a checagem de anúncios de
+`android/app/build.gradle`: IDs de teste do Google ou `testAds: true` quebram o PR.
 Tags `v*` passam pelas mesmas verificações antes do job de publicação.
 O Node 24.15.0 atende ao Angular 22 deste projeto; o CI usa Java 21.
 O navegador usa dispositivos simulados: o CI não comprova funcionamento Bluetooth
@@ -21,10 +24,9 @@ O app fica na raiz, com `android/`, o wrapper Gradle e o lockfile npm. O
 `src/index.html`. O GitHub Pages continua usando `main` e a raiz, sem publicar
 o build Angular. O arquivo `_config.yml` exclui as pastas e configurações do app
 da geração do site. Alterar o site não é parte do fluxo Android.
-O ambiente e os secrets abaixo não estavam configurados na conferência inicial.
-
-Crie o ambiente `google-play-internal` nas configurações do repositório. Configure
-os seguintes secrets nesse ambiente (os valores nunca entram no Git):
+O ambiente `google-play-internal` existe, aceita só tags `v*` e exige aprovação de
+`rodriguessdeyson` antes de publicar. Configure os seguintes secrets nesse ambiente
+(os valores nunca entram no Git):
 
 | Secret | Conteúdo |
 | --- | --- |
@@ -33,6 +35,20 @@ os seguintes secrets nesse ambiente (os valores nunca entram no Git):
 | `UNWIRED_ANDROID_STORE_PASSWORD` | Senha do keystore |
 | `UNWIRED_ANDROID_KEY_PASSWORD` | Senha da chave |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | JSON da conta de serviço autorizada no Play Console para o unWired |
+
+Para gravar um secret sem que o valor fique no histórico do terminal, rode o comando
+e cole o valor quando ele pedir:
+
+```bash
+gh secret set UNWIRED_ANDROID_KEY_ALIAS -R rodriguessdeyson/unwired --env google-play-internal
+```
+
+O keystore e o JSON podem ir direto de arquivo:
+
+```bash
+base64 -w0 caminho/da/chave.jks | gh secret set UNWIRED_ANDROID_SIGNING_KEY -R rodriguessdeyson/unwired --env google-play-internal
+gh secret set GOOGLE_PLAY_SERVICE_ACCOUNT_JSON -R rodriguessdeyson/unwired --env google-play-internal < caminho/da/conta-de-servico.json
+```
 
 Não use a chave do Ohm Finder por semelhança de projeto. A chave precisa corresponder
 ao certificado de upload registrado para `com.rad.unwired` em Integridade do app.
@@ -77,8 +93,9 @@ o proprietário precisará concluir esse passo no Console; o workflow não tenta
 reenviar com essa proteção desativada. O estado de remoção do app, políticas
 pendentes ou falta de permissões também podem impedir a disponibilização do teste.
 
-As propriedades `-PversionCode` e `-PversionName` controlam apenas o build de CI;
-os valores locais padrão permanecem 20000 e 2.0.0. Não altere o applicationId.
+As propriedades `-PversionCode` e `-PversionName` controlam apenas o build de CI.
+Sem elas, o build local usa os valores de `android/app/build.gradle` (hoje 20001 e
+2.0.1); suba esses valores antes de gerar um AAB à mão. Não altere o applicationId.
 
 Referências: [upload-google-play](https://github.com/r0adkll/upload-google-play),
 [versionamento Android](https://developer.android.com/studio/publish/versioning).
