@@ -4,7 +4,7 @@
 |---|---|
 | `simulator/` | Simula placas por Wi-Fi ou pela porta COM, sem hardware |
 | `ci/` | Versionamento do Android usado pelo GitHub Actions |
-| `store-art/` | Gera o ícone, o banner e as capturas da Play Store, e os ícones do launcher para Android 7 (`launcher-icons.mjs`) |
+| `icons/` | Gera os ícones do launcher para Android 7, que não tem ícone adaptativo (`launcher-icons.mjs`) |
 
 Os sketches e exemplos de protocolo ficam em [examples/](../examples/README.md).
 

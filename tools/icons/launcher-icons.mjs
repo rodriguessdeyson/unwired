@@ -1,6 +1,6 @@
 // Gera mipmap-*/ic_launcher.png e ic_launcher_round.png (Android 7.0 e 7.1) a partir de launcher.html.
 // Renderiza em 512 px e reduz no recorte da captura: o Chrome headless não abre janela pequena.
-// Uso: node tools/store-art/launcher-icons.mjs [caminho do chrome]
+// Uso: node tools/icons/launcher-icons.mjs [caminho do chrome]
 import { spawn } from 'node:child_process';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
