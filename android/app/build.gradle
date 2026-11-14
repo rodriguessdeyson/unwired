@@ -7,8 +7,8 @@ android {
         applicationId "com.rad.unwired"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode providers.gradleProperty('versionCode').map { Integer.parseInt(it) }.getOrElse(20000)
-        versionName providers.gradleProperty('versionName').getOrElse("2.0.0")
+        versionCode providers.gradleProperty('versionCode').map { Integer.parseInt(it) }.getOrElse(20001)
+        versionName providers.gradleProperty('versionName').getOrElse("2.0.1")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -43,6 +43,24 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+// Build de release com IDs de anúncio de teste do Google não paga nada: falha no início do build,
+// antes de gerar o AAB ou o APK. Só valores entre aspas contam, não comentários.
+def adConfigFiles = [
+    file('src/main/AndroidManifest.xml'),
+    rootProject.file('../src/app/core/monetization/monetization.config.ts'),
+]
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    doFirst {
+        def withTestIds = adConfigFiles.findAll { it.text =~ /["']ca-app-pub-3940256099942544/ }
+        if (withTestIds) {
+            throw new GradleException("Release com IDs de anúncio de teste do Google em: ${withTestIds*.path.join(', ')}. Use os IDs do AdMob.")
+        }
+        if (adConfigFiles[1].text =~ /(?m)^\s*testAds:\s*true/) {
+            throw new GradleException('Release com testAds: true em monetization.config.ts.')
+        }
+    }
+}
 
 try {
     def servicesJSON = file('google-services.json')

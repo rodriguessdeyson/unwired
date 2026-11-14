@@ -43,3 +43,17 @@ describe('hashUnlockCode', () => {
     expect(await hashUnlockCode('REVIEW-ERRADO')).not.toBe(MONETIZATION.unlockCodeSha256);
   });
 });
+
+describe('IDs de anúncio', () => {
+  const googleTest = 'ca-app-pub-3940256099942544';
+  const ids = [MONETIZATION.bannerAdId, MONETIZATION.interstitialAdId];
+
+  it('testAds acompanha os IDs: só true com os IDs de teste do Google', () => {
+    for (const id of ids) expect(id.startsWith(googleTest)).toBe(MONETIZATION.testAds);
+  });
+
+  it('os blocos são da mesma conta do AdMob', () => {
+    const publishers = new Set(ids.map((id) => id.split('/')[0]));
+    expect(publishers.size).toBe(1);
+  });
+});

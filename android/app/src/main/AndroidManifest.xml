@@ -30,7 +30,7 @@
         <!-- ID do app no AdMob. Este é o de TESTE do Google: troque pelo seu antes de publicar. -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-4749632185565734~2798933931" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

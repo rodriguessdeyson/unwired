@@ -2,7 +2,7 @@
 
 - Keep `com.rad.unwired` and raise `versionCode` from the last published build. Never commit keystores.
 - The app is local-only: no account and no backend of our own. Fonts are bundled. The only network traffic besides the devices is AdMob (free tier) and Google Play Billing.
-- Free with ads; a one-time `unwired_premium` purchase (price set in Play Console) removes ads and unlocks exports. IDs live in `src/app/core/monetization/monetization.config.ts` and the AdMob `APPLICATION_ID` in the manifest; both ship as Google's test IDs until replaced. No ads on the Session tab, and bottom sheets hide the native banner.
+- Free with ads; a one-time `unwired_premium` purchase (price set in Play Console) removes ads and unlocks exports. IDs live in `src/app/core/monetization/monetization.config.ts` and the AdMob `APPLICATION_ID` in the manifest; both hold the real AdMob IDs. Release builds fail on Google's test IDs or `testAds: true` (check in `android/app/build.gradle`). Before any upload, confirm the ad IDs and raise `versionCode` in that same file. No ads on the Session tab, and bottom sheets hide the native banner.
 - Layout: services without UI go in `src/app/core/<topic>/`, screens and their private components in `src/app/features/<area>/`, UI used by two or more areas in `src/app/shared/`. Tests sit next to the file they test. The README has the folder map; update it when adding a folder.
 - Screens never touch a transport directly. They use `SessionStore`, which uses `SerialTransport`.
 - The legacy 5-byte format, the `LS`/`DS` defaults and the import from `com.rad.unwired_preferences` protect existing firmware and users. Add a test before changing them.

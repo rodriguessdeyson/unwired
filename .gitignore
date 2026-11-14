@@ -46,6 +46,7 @@ Thumbs.db
 # Release credentials must never enter version control, including outside android/.
 *.jks
 *.keystore
+/keystores/
 *.p12
 keystore.properties
 service-account*.json
