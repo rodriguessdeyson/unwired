@@ -140,4 +140,3 @@ jobs:
           tracks: internal
           status: completed
           releaseName: ${{ github.ref_name }}
-          changesNotSentForReview: true
