@@ -74,13 +74,13 @@ jobs:
       - name: Validate release credentials
         shell: bash
         env:
-          UNWIRED_ANDROID_SIGNING_KEY: ${{ secrets.UNWIRED_ANDROID_SIGNING_KEY }}
-          UNWIRED_ANDROID_KEY_ALIAS: ${{ secrets.UNWIRED_ANDROID_KEY_ALIAS }}
-          UNWIRED_ANDROID_STORE_PASSWORD: ${{ secrets.UNWIRED_ANDROID_STORE_PASSWORD }}
-          UNWIRED_ANDROID_KEY_PASSWORD: ${{ secrets.UNWIRED_ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
-          for name in UNWIRED_ANDROID_SIGNING_KEY UNWIRED_ANDROID_KEY_ALIAS UNWIRED_ANDROID_STORE_PASSWORD UNWIRED_ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEY_ALIAS ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
             if [ -z "${!name}" ]; then
               echo "::error::Missing $name in google-play-internal"
               exit 1
@@ -112,23 +112,23 @@ jobs:
       - name: Sign and verify Android bundle
         shell: bash
         env:
-          UNWIRED_ANDROID_SIGNING_KEY: ${{ secrets.UNWIRED_ANDROID_SIGNING_KEY }}
-          UNWIRED_ANDROID_KEY_ALIAS: ${{ secrets.UNWIRED_ANDROID_KEY_ALIAS }}
-          UNWIRED_ANDROID_STORE_PASSWORD: ${{ secrets.UNWIRED_ANDROID_STORE_PASSWORD }}
-          UNWIRED_ANDROID_KEY_PASSWORD: ${{ secrets.UNWIRED_ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           umask 077
           KEYSTORE="$RUNNER_TEMP/unwired-upload.keystore"
           trap 'rm -f "$KEYSTORE"' EXIT
-          printf '%s' "$UNWIRED_ANDROID_SIGNING_KEY" | base64 --decode > "$KEYSTORE"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
           mkdir -p release
           AAB="release/unwired-${GITHUB_REF_NAME}.aab"
           jarsigner -keystore "$KEYSTORE" \
-            -storepass:env UNWIRED_ANDROID_STORE_PASSWORD \
-            -keypass:env UNWIRED_ANDROID_KEY_PASSWORD \
+            -storepass:env ANDROID_KEYSTORE_PASSWORD \
+            -keypass:env ANDROID_KEY_PASSWORD \
             -signedjar "$AAB" android/app/build/outputs/bundle/release/app-release.aab \
-            "$UNWIRED_ANDROID_KEY_ALIAS"
+            "$ANDROID_KEY_ALIAS"
           LC_ALL=C jarsigner -verify "$AAB" | tee "$RUNNER_TEMP/unwired-aab-signature.txt"
           grep -q 'jar verified' "$RUNNER_TEMP/unwired-aab-signature.txt"
       - name: Publish signed AAB to Google Play Internal
@@ -140,3 +140,23 @@ jobs:
           tracks: internal
           status: completed
           releaseName: ${{ github.ref_name }}
+
+      # Mesmo layout dos outros apps: android/<tag>/<app>-<tag>.aab no bucket unwired-releases (apagado após 7 dias).
+      - name: Upload signed release AAB to Cloudflare R2
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
+          R2_ENDPOINT: ${{ vars.CLOUDFLARE_R2_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          AAB="release/unwired-${GITHUB_REF_NAME}.aab"
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$R2_BUCKET" ] || [ -z "$R2_ENDPOINT" ]; then
+            echo "::error::Missing Cloudflare R2 configuration in the google-play-internal environment"
+            exit 1
+          fi
+          OBJECT_KEY="android/${GITHUB_REF_NAME}/unwired-${GITHUB_REF_NAME}.aab"
+          aws s3 cp "$AAB" "s3://${R2_BUCKET}/${OBJECT_KEY}" --endpoint-url "$R2_ENDPOINT" --no-progress
+          echo "AAB published to R2: s3://${R2_BUCKET}/${OBJECT_KEY}"
