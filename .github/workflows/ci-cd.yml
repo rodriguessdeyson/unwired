@@ -140,3 +140,23 @@ jobs:
           tracks: internal
           status: completed
           releaseName: ${{ github.ref_name }}
+
+      # Mesmo layout dos outros apps: android/<tag>/<app>-<tag>.aab no bucket unwired-releases (apagado após 7 dias).
+      - name: Upload signed release AAB to Cloudflare R2
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
+          R2_ENDPOINT: ${{ vars.CLOUDFLARE_R2_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          AAB="release/unwired-${GITHUB_REF_NAME}.aab"
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$R2_BUCKET" ] || [ -z "$R2_ENDPOINT" ]; then
+            echo "::error::Missing Cloudflare R2 configuration in the google-play-internal environment"
+            exit 1
+          fi
+          OBJECT_KEY="android/${GITHUB_REF_NAME}/unwired-${GITHUB_REF_NAME}.aab"
+          aws s3 cp "$AAB" "s3://${R2_BUCKET}/${OBJECT_KEY}" --endpoint-url "$R2_ENDPOINT" --no-progress
+          echo "AAB published to R2: s3://${R2_BUCKET}/${OBJECT_KEY}"

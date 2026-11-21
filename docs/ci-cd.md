@@ -35,6 +35,11 @@ O ambiente `google-play-internal` existe, aceita só tags `v*` e exige aprovaç�
 | `ANDROID_KEYSTORE_PASSWORD` | Senha do keystore |
 | `ANDROID_KEY_PASSWORD` | Senha da chave |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | JSON da conta de serviço autorizada no Play Console para o unWired |
+| `CLOUDFLARE_R2_ACCESS_KEY_ID` | Access Key do token R2 `unwired-releases` (Object Read & Write só nesse bucket) |
+| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | Secret Key do mesmo token |
+
+Variables do mesmo environment: `CLOUDFLARE_R2_BUCKET` (`unwired-releases`) e `CLOUDFLARE_R2_ENDPOINT`.
+O AAB assinado vai para `android/<tag>/unwired-<tag>.aab` e é apagado pelo bucket após 7 dias.
 
 Para gravar um secret sem que o valor fique no histórico do terminal, rode o comando
 e cole o valor quando ele pedir:
