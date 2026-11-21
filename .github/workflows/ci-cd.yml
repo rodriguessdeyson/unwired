@@ -74,13 +74,13 @@ jobs:
       - name: Validate release credentials
         shell: bash
         env:
-          UNWIRED_ANDROID_SIGNING_KEY: ${{ secrets.UNWIRED_ANDROID_SIGNING_KEY }}
-          UNWIRED_ANDROID_KEY_ALIAS: ${{ secrets.UNWIRED_ANDROID_KEY_ALIAS }}
-          UNWIRED_ANDROID_STORE_PASSWORD: ${{ secrets.UNWIRED_ANDROID_STORE_PASSWORD }}
-          UNWIRED_ANDROID_KEY_PASSWORD: ${{ secrets.UNWIRED_ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
-          for name in UNWIRED_ANDROID_SIGNING_KEY UNWIRED_ANDROID_KEY_ALIAS UNWIRED_ANDROID_STORE_PASSWORD UNWIRED_ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEY_ALIAS ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
             if [ -z "${!name}" ]; then
               echo "::error::Missing $name in google-play-internal"
               exit 1
@@ -112,23 +112,23 @@ jobs:
       - name: Sign and verify Android bundle
         shell: bash
         env:
-          UNWIRED_ANDROID_SIGNING_KEY: ${{ secrets.UNWIRED_ANDROID_SIGNING_KEY }}
-          UNWIRED_ANDROID_KEY_ALIAS: ${{ secrets.UNWIRED_ANDROID_KEY_ALIAS }}
-          UNWIRED_ANDROID_STORE_PASSWORD: ${{ secrets.UNWIRED_ANDROID_STORE_PASSWORD }}
-          UNWIRED_ANDROID_KEY_PASSWORD: ${{ secrets.UNWIRED_ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           umask 077
           KEYSTORE="$RUNNER_TEMP/unwired-upload.keystore"
           trap 'rm -f "$KEYSTORE"' EXIT
-          printf '%s' "$UNWIRED_ANDROID_SIGNING_KEY" | base64 --decode > "$KEYSTORE"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
           mkdir -p release
           AAB="release/unwired-${GITHUB_REF_NAME}.aab"
           jarsigner -keystore "$KEYSTORE" \
-            -storepass:env UNWIRED_ANDROID_STORE_PASSWORD \
-            -keypass:env UNWIRED_ANDROID_KEY_PASSWORD \
+            -storepass:env ANDROID_KEYSTORE_PASSWORD \
+            -keypass:env ANDROID_KEY_PASSWORD \
             -signedjar "$AAB" android/app/build/outputs/bundle/release/app-release.aab \
-            "$UNWIRED_ANDROID_KEY_ALIAS"
+            "$ANDROID_KEY_ALIAS"
           LC_ALL=C jarsigner -verify "$AAB" | tee "$RUNNER_TEMP/unwired-aab-signature.txt"
           grep -q 'jar verified' "$RUNNER_TEMP/unwired-aab-signature.txt"
       - name: Publish signed AAB to Google Play Internal

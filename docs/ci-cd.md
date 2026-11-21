@@ -30,23 +30,23 @@ O ambiente `google-play-internal` existe, aceita só tags `v*` e exige aprovaç�
 
 | Secret | Conteúdo |
 | --- | --- |
-| `UNWIRED_ANDROID_SIGNING_KEY` | Keystore de upload do **unWired** codificado em Base64 |
-| `UNWIRED_ANDROID_KEY_ALIAS` | Alias da chave de upload |
-| `UNWIRED_ANDROID_STORE_PASSWORD` | Senha do keystore |
-| `UNWIRED_ANDROID_KEY_PASSWORD` | Senha da chave |
+| `ANDROID_KEYSTORE_BASE64` | Keystore de upload do **unWired** codificado em Base64 |
+| `ANDROID_KEY_ALIAS` | Alias da chave de upload |
+| `ANDROID_KEYSTORE_PASSWORD` | Senha do keystore |
+| `ANDROID_KEY_PASSWORD` | Senha da chave |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | JSON da conta de serviço autorizada no Play Console para o unWired |
 
 Para gravar um secret sem que o valor fique no histórico do terminal, rode o comando
 e cole o valor quando ele pedir:
 
 ```bash
-gh secret set UNWIRED_ANDROID_KEY_ALIAS -R rodriguessdeyson/unwired --env google-play-internal
+gh secret set ANDROID_KEY_ALIAS -R rodriguessdeyson/unwired --env google-play-internal
 ```
 
 O keystore e o JSON podem ir direto de arquivo:
 
 ```bash
-base64 -w0 caminho/da/chave.jks | gh secret set UNWIRED_ANDROID_SIGNING_KEY -R rodriguessdeyson/unwired --env google-play-internal
+base64 -w0 caminho/da/chave.jks | gh secret set ANDROID_KEYSTORE_BASE64 -R rodriguessdeyson/unwired --env google-play-internal
 gh secret set GOOGLE_PLAY_SERVICE_ACCOUNT_JSON -R rodriguessdeyson/unwired --env google-play-internal < caminho/da/conta-de-servico.json
 ```
 
